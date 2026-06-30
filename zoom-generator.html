@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة مشاهدة ويبينار زووم المباشرة</title>
+    <!-- تضمين Tailwind CSS للتصميم العصري -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- كود إعلانات جوجل أدسينس الافتراضي -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; }
+        .dir-ltr { direction: ltr; }
+    </style>
+</head>
+<body class="bg-radial from-slate-50 to-slate-200 flex flex-col items-center justify-between min-h-screen p-4">
+
+    <!-- شريط علوي يحتوي على زر الشرح -->
+    <div class="w-full max-w-4xl flex justify-end mb-2">
+        <button onclick="openHelpModal()" class="flex items-center gap-2 bg-white hover:bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-xl shadow-sm border border-gray-200 text-sm transition cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            كيفية الاستخدام؟
+        </button>
+    </div>
+
+    <!-- إعلان علوي للموقع -->
+    <div class="w-full max-w-4xl bg-white/50 backdrop-blur-md p-2 rounded-xl text-center border border-gray-200 text-xs text-gray-400 mb-4">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script>
+        [مساحة إعلانية علوية - Banner]
+    </div>
+
+    <!-- الكرت الرئيسي -->
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-xl w-full border border-gray-100/80 transition-all duration-300 hover:shadow-blue-100/50 my-auto">
+        
+        <!-- الرأس والتصميم الجمالي -->
+        <div class="text-center mb-8">
+            <div class="inline-flex p-4 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-2xl text-white shadow-lg shadow-blue-500/30 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">بوابة زووم الذكية</h1>
+            <p class="text-gray-500 text-sm mt-2">تخطي التطبيقات وشاهد الويبينار مباشرة عبر متصفحك مجاناً</p>
+        </div>
+
+        <!-- حقل الإدخال -->
+        <div class="mb-6">
+            <label for="zoomInput" class="block text-sm font-semibold text-gray-700 mb-2">أدخل رابط الويبينار أو معرف الاجتماع (ID):</label>
+            <div class="relative">
+                <input type="text" id="zoomInput" placeholder="https://zoom.us/j/123456789..." 
+                    class="w-full px-5 py-4 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-left dir-ltr font-mono text-sm placeholder:text-right placeholder:font-sans">
+            </div>
+        </div>
+
+        <!-- زر التوليد والتشغيل الرئيسي -->
+        <button onclick="startProcess()" 
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-4 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 active:scale-98 cursor-pointer text-center block">
+            توليد ودخول الويبينار الآن
+        </button>
+        
+        <!-- صندوق خطأ -->
+        <div id="errorBox" class="hidden mt-4 text-red-600 text-sm font-medium text-center bg-red-50 p-3 rounded-xl border border-red-100 animate-pulse">
+            عذراً، يرجى التأكد من إدخال رابط زووم أو معرف صحيح!
+        </div>
+    </div>
+
+    <!-- نافذة العداد التنازلي المنبثقة -->
+    <div id="popupModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative z-10 border border-gray-100 text-center transform scale-95 transition-all duration-300">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">جاري تجهيز بث المتصفح المباشر...</h3>
+            <p class="text-sm text-gray-500 mb-6">يرجى الانتظار قليلاً حتى تكتمل التهيئة الآمنة.</p>
+
+            <!-- مساحة إعلانية داخل النافذة -->
+            <div class="w-full bg-gray-50 border border-dashed border-gray-200 p-4 rounded-xl text-xs text-gray-400 min-h-[100px] flex items-center justify-center mb-6">
+                <div>
+                    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:100px" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1122334455"></ins>
+                    <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script>
+                    <p>[إعلان غوغل أدسينس - 300x100]</p>
+                </div>
+            </div>
+
+            <!-- العداد التنازلي -->
+            <div class="flex flex-col items-center justify-center mb-6">
+                <div id="countdownCircle" class="w-20 h-20 rounded-full border-4 border-blue-100 border-t-blue-600 animate-spin flex items-center justify-center mb-3">
+                    <span id="countdownText" class="text-2xl font-bold text-blue-600" style="animation: none;">10</span>
+                </div>
+                <p id="statusMessage" class="text-sm font-medium text-gray-600">الرابط سينبثق تلقائياً فور انتهاء العداد.</p>
+            </div>
+
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition cursor-pointer">
+                    إلغاء والعودة
+                </button>
+                <a id="directLinkBtn" href="#" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-xl transition opacity-50 cursor-not-allowed pointer-events-none text-center">
+                    الانتقال للبث المباشر
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة "شرح كيفية الاستخدام" المنبثقة -->
+    <div id="helpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeHelpModal()"></div>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 relative z-10 border border-gray-100 text-right">
+            
+            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-3">
+                <h3 class="text-xl font-bold text-gray-800">دليل استخدام المنصة</h3>
+                <button onclick="closeHelpModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-semibold cursor-pointer">&times;</button>
+            </div>
+
+            <!-- القوائم المنسدلة (Accordion) -->
+            <div class="space-y-3">
+                <!-- المنسدلة الأولى -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button onclick="toggleAccordion(1)" class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition font-medium text-gray-700 text-sm cursor-pointer">
+                        <span>الخطوة 1: الحصول على رابط الويبينار</span>
+                        <svg id="arrow-1" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="content-1" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed">
+                        قم بنسخ رابط دعوة زووم الموجهة إليك، أو يمكنك فقط أخذ الرقم التعريفي للاجتماع (Meeting ID) المكون من 9 إلى 11 رقماً.
+                    </div>
+                </div>
+
+                <!-- المنسدلة الثانية -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button onclick="toggleAccordion(2)" class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition font-medium text-gray-700 text-sm cursor-pointer">
+                        <span>الخطوة 2: توليد الرابط وبدء العداد</span>
+                        <svg id="arrow-2" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="content-2" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed">
+                        ضع الرابط أو الرقم في الحقل المخصص بالصفحة الرئيسية واضغط على "توليد ودخول الويبينار". ستظهر لك نافذة الانتظار مع عداد تنازلي مدته 10 ثوانٍ لحماية البث وتجهيزه.
+                    </div>
+                </div>
+
+                <!-- المنسدلة الثالثة -->
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button onclick="toggleAccordion(3)" class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition font-medium text-gray-700 text-sm cursor-pointer">
+                        <span>الخطوة 3: المشاهدة في المتصفح</span>
+                        <svg id="arrow-3" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="content-3" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed">
+                        عند انتهاء العداد، سيفتح المتصفح نافذة البث المباشر لزووم تلقائياً. إذا طلب منك رمز المرور (Passcode)، قم بإدخاله للمشاهدة فوراً دون الحاجة لتثبيت أي برامج.
+                    </div>
+                </div>
+            </div>
+
+            <!-- زر العودة وإغلاق نافذة الشرح -->
+            <div class="mt-6 text-center">
+                <button onclick="closeHelpModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-xl transition text-sm cursor-pointer w-full sm:w-auto">
+                    فهمت، العودة للموقع
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- إعلان سفلي للموقع -->
+    <div class="w-full max-w-4xl bg-white/50 backdrop-blur-md p-2 rounded-xl text-center border border-gray-200 text-xs text-gray-400 mt-4">
+        [مساحة إعلانية سفلية - Banner]
+    </div>
+
+    <!-- كود الجافا سكريبت للتحكم بالصفحة والنوافذ وقوائم الأكورديون -->
+    <script>
+        let countdownValue = 10;
+        let countdownTimer;
+        let generatedUrl = "";
+
+        function startProcess() {
+            const input = document.getElementById('zoomInput').value.trim();
+            const errorBox = document.getElementById('errorBox');
+            let meetingId = '';
+
+            if (!input) { showError(); return; }
+
+            if (input.includes('zoom.us')) {
+                const match = input.match(/\/[jws]\/(\d+)/);
+                if (match && match[1]) { meetingId = match[1]; } 
+                else { const cleanNumbers = input.match(/\d+/); if (cleanNumbers) meetingId = cleanNumbers[0]; }
+            } else {
+                meetingId = input.replace(/\s+/g, '');
+            }
+
+            if (meetingId && /^\d+$/.test(meetingId)) {
+                errorBox.classList.add('hidden');
+                generatedUrl = `https://zoom.us/wc/join/${meetingId}`;
+                openModal();
+            } else {
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('errorBox').classList.remove('hidden');
+        }
+
+        function openModal() {
+            const modal = document.getElementById('popupModal');
+            const countdownText = document.getElementById('countdownText');
+            const directLinkBtn = document.getElementById('directLinkBtn');
+            const circle = document.getElementById('countdownCircle');
+            
+            modal.classList.remove('hidden');
+            countdownValue = 10;
+            countdownText.innerText = countdownValue;
+            circle.classList.add('animate-spin');
+
+            countdownTimer = setInterval(() => {
+                countdownValue--;
+                countdownText.innerText = countdownValue;
+
+                if (countdownValue <= 0) {
+                    clearInterval(countdownTimer);
+                    circle.classList.remove('animate-spin');
+                    circle.classList.add('bg-emerald-50', 'border-emerald-500');
+                    countdownText.innerHTML = "✓";
+                    countdownText.classList.add('text-emerald-600');
+                    document.getElementById('statusMessage').innerText = "الرابط جاهز الآن!";
+
+                    directLinkBtn.href = generatedUrl;
+                    directLinkBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    window.open(generatedUrl, '_blank');
+                }
+            }, 1000);
+        }
+
+        function closeModal() {
+            clearInterval(countdownTimer);
+            document.getElementById('popupModal').classList.add('hidden');
+            const circle = document.getElementById('countdownCircle');
+            const countdownText = document.getElementById('countdownText');
+            circle.classList.remove('bg-emerald-50', 'border-emerald-500');
+            countdownText.classList.remove('text-emerald-600');
+            document.getElementById('statusMessage').innerText = "الرابط سينبثق تلقائياً فور انتهاء العداد.";
+            const directLinkBtn = document.getElementById('directLinkBtn');
+            directLinkBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+
+        // دالات التحكم بنافذة المساعدة وقوائمها المنسدلة
+        function openHelpModal() {
+            document.getElementById('helpModal').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').classList.add('hidden');
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(`content-${id}`);
+            const arrow = document.getElementById(`arrow-${id}`);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        }
+    </script>
+</body>
+</html>
