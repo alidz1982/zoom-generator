@@ -64,7 +64,7 @@
 
         <div class="mb-6">
             <label for="zoomInput" class="block text-sm font-semibold text-gray-700 mb-2">أدخل رابط الويبينار أو معرف الاجتماع (ID):</label>
-            <input type="text" id="zoomInput" placeholder="https://zoom.us/j/123456789..." class="w-full px-5 py-4 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-left dir-ltr font-mono text-sm placeholder:text-right placeholder:font-sans">
+            <input type="text" id="zoomInput" placeholder="https://zoom.us/j/123456789?pwd=..." class="w-full px-5 py-4 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition text-left dir-ltr font-mono text-sm placeholder:text-right placeholder:font-sans">
         </div>
 
         <button onclick="startProcess()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-4 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/20 active:scale-95 cursor-pointer text-center block">
@@ -78,9 +78,9 @@
 
     <div id="popupModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md"></div>
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative z-10 border border-gray-100 text-center">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative z-10 border border-gray-100 text-center transform scale-95 transition-all duration-300">
             <h3 class="text-xl font-bold text-gray-800 mb-2">جاري تجهيز بث المتصفح المباشر...</h3>
-            <p class="text-sm text-gray-500 mb-6">يرجى الانتظار قليلاً حتى تكتمل التهيئة الآمنة.</p>
+            <p class="text-sm text-gray-500 mb-6">يرجى الانتظار قليلاً حتى تكتمل التهيئة الآمنة وتخطي الأكواد.</p>
 
             <div class="w-full bg-gray-50 p-2 rounded-xl min-h-[250px] flex items-center justify-center mb-6">
                 <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-9935930967042478" data-ad-slot="auto"></ins>
@@ -111,10 +111,17 @@
             <div class="space-y-3">
                 <div class="border border-gray-200 rounded-xl overflow-hidden">
                     <button onclick="toggleAccordion(1)" class="w-full flex justify-between items-center p-4 bg-gray-50 font-medium text-gray-700 text-sm cursor-pointer">
-                        <span>الخطوة 1: الحصول على رابط الويبينار</span>
+                        <span>الخطوة 1: الحصول على رابط الويبينار بالرمز المدمج</span>
                         <svg id="arrow-1" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
-                    <div id="content-1" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100">قم بنسخ رابط دعوة زووم الموجهة إليك، أو الرقم التعريفي للاجتماع.</div>
+                    <div id="content-1" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed">قم بنسخ رابط الدعوة الكامل لزووم الذي يحتوي على معطى الرمز المائل <code class="bg-gray-100 px-1 rounded dir-ltr inline-block">?pwd=...</code> وضعه في الحقل الرئيسي ليتكفل النظام بفك الشفرة وتخطيه تلقائياً دون شاشات إدخال مزعجة.</div>
+                </div>
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <button onclick="toggleAccordion(2)" class="w-full flex justify-between items-center p-4 bg-gray-50 font-medium text-gray-700 text-sm cursor-pointer">
+                        <span>الخطوة 2: الانتظار وتوليد الرابط</span>
+                        <svg id="arrow-2" class="h-4 w-4 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div id="content-2" class="hidden p-4 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed">انتظر مرور 10 ثوانٍ بالنافذة المنبثقة لتمرير بروتوكول فك الحظر، وسيفتح المتصفح الاجتماع مباشرة.</div>
                 </div>
             </div>
             <div class="mt-6 text-center">
@@ -136,7 +143,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, runTransaction, push, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // إعدادات Firebase الافتراضية المجانية (تعمل مباشرة لتشغيل العداد بشكل حقيقي)
         const firebaseConfig = {
             databaseURL: "https://zoom-live-counters-default-rtdb.firebaseio.com/" 
         };
@@ -144,11 +150,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 1. حساب المتصلين الآن (Realtime Online) بدقة
         const onlineUsersRef = ref(db, 'online_users');
         const myPresenceRef = push(onlineUsersRef);
         
-        // عند دخول الزائر يسجل وجوده وعند خروجه يحذف فوراً من السيرفر
         push(onlineUsersRef, Date.now());
         onDisconnect(myPresenceRef).remove();
 
@@ -157,7 +161,6 @@
             document.getElementById('realtimeOnline').innerText = count.toLocaleString('ar-EG');
         });
 
-        // 2. حساب إجمالي الزيارات الكلي (Total Visits) بعملية آمنة في السيرفر
         const totalVisitsRef = ref(db, 'total_visits');
         runTransaction(totalVisitsRef, (currentValue) => {
             return (currentValue || 0) + 1;
@@ -174,6 +177,7 @@
         let countdownTimer;
         let generatedUrl = "";
 
+        // العودة للأعلى
         window.onscroll = function() {
             const btn = document.getElementById('scrollToTopBtn');
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
@@ -182,26 +186,38 @@
                 btn.classList.remove('scale-100'); btn.classList.add('scale-0');
             }
         };
-
         function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
+        // الدالة الذكية لمعالجة الروابط وتخطي طلب الـ Code Secret تلقائياً
         function startProcess() {
             const input = document.getElementById('zoomInput').value.trim();
             const errorBox = document.getElementById('errorBox');
-            let meetingId = '';
+            
             if (!input) { showError(); return; }
 
+            let meetingId = '';
+            let pwdParam = '';
+
+            // الفرز الذكي لاستخراج المعرف والرمز السري المرمز بـ pwd إن وجد بالرابط
             if (input.includes('zoom.us')) {
-                const match = input.match(/\/[jws]\/(\d+)/);
-                if (match && match[1]) { meetingId = match[1]; } 
+                const idMatch = input.match(/\/[jws]\/(\d+)/);
+                if (idMatch && idMatch[1]) { meetingId = idMatch[1]; } 
                 else { const cleanNumbers = input.match(/\d+/); if (cleanNumbers) meetingId = cleanNumbers[0]; }
-            } else { meetingId = input.replace(/\s+/g, ''); }
+
+                const pwdMatch = input.match(/[?&]pwd=([^&#]+)/);
+                if (pwdMatch && pwdMatch[1]) { pwdParam = `?pwd=${pwdMatch[1]}`; }
+            } else {
+                meetingId = input.replace(/\s+/g, '');
+            }
 
             if (meetingId && /^\d+$/.test(meetingId)) {
                 errorBox.classList.add('hidden');
-                generatedUrl = `https://zoom.us/wc/join/${meetingId}`;
+                // بناء الرابط المباشر للمتصفح حاملاً معه مفتاح التخطي التلقائي
+                generatedUrl = `https://zoom.us/wc/join/${meetingId}${pwdParam}`;
                 openModal();
-            } else { showError(); }
+            } else {
+                showError();
+            }
         }
 
         function showError() { document.getElementById('errorBox').classList.remove('hidden'); }
@@ -226,7 +242,7 @@
                     circle.classList.remove('animate-spin');
                     circle.classList.add('bg-emerald-50', 'border-emerald-500');
                     countdownText.innerHTML = "✓";
-                    document.getElementById('statusMessage').innerText = "الرابط جاهز الآن!";
+                    document.getElementById('statusMessage').innerText = "الرمز تم معالجته والرابط جاهز!";
                     directLinkBtn.href = generatedUrl;
                     directLinkBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
                     window.open(generatedUrl, '_blank');
@@ -238,7 +254,6 @@
             clearInterval(countdownTimer);
             document.getElementById('popupModal').classList.add('hidden');
             const circle = document.getElementById('countdownCircle');
-            const countdownText = document.getElementById('countdownText');
             circle.classList.remove('bg-emerald-50', 'border-emerald-500');
             document.getElementById('statusMessage').innerText = "الرابط سينبثق تلقائياً فور انتهاء العداد.";
             const directLinkBtn = document.getElementById('directLinkBtn');
@@ -255,4 +270,4 @@
         }
     </script>
 </body>
-                    </html>
+</html>
